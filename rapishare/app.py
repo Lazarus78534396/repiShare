@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import filedialog, Text
 from tkinter.messagebox import showinfo
-import os
+import os, socket
 
 root = tk.Tk(className='RapiShare 1.0')
 root.geometry("500x600")
@@ -28,6 +28,15 @@ def chooseFiles():
 		myFile = tk.Label(frame,text=file,bg='#0779e4')
 		myFile.pack()
 
+
+def sendingFile():
+	for file in myFiles:
+		tempfile=str(file).split("/",1)[1]
+		fFile = str(tempfile).split('.',1)[0]
+		showinfo("Successfull ",fFile+" Sent Successfully")
+
+		
+
 def switch():
 	#to disable some buttons
 	if joinConnection['state'] and createConnection['state']== tk.NORMAL:
@@ -42,7 +51,21 @@ def switch():
 def startConn():
 	#for starting a connection as a server
 	switch()
-	showinfo('Host Name','Host Name:LAZBEATZ')
+
+	s = socket.socket()
+	host = socket.gethostname()
+	port = 5002
+	s.bind((host,port))
+	s.listen(1)
+	showinfo('Host Name','Host Name:'+host)
+	conn,addr = s.accept()
+	showinfo('Conected',str(addr)+' Has connected')
+
+	for myf in myFiles:
+		file = open(myf,'rb')
+		file_data = file.read(1024)
+		conn.send(file_data)
+		sendingFile()
 
 def join_form():
 	root2 = tk.Tk(className="Host and File")
@@ -50,7 +73,18 @@ def join_form():
 	root2.resizable(False,False)
 
 	def rec_details():
-		pass
+		s = socket.socket()
+		theHost=host_input.get()
+		port = 5002
+		s.connect((theHost,port))
+		showinfo('Connected', 'Connected...')
+		mynewFile=file_input.get()
+		file = open(mynewFile,'wb')
+		file_data = s.recv(1024)
+		file.write(file_data)
+		file.close()
+		showinfo('Recieved','File Recieved')
+		
 
 	frame2 = tk.Frame(root2,bg="#30475e")
 	frame2.place(relwidth=1,relheight=1)
@@ -64,10 +98,10 @@ def join_form():
 	new_fileName= tk.Label(frame2,text='New File Name:')
 	new_fileName.place(y=100,x=30)
 
-	host_input = tk.Entry(frame2,width=40)
-	host_input.place(y=100,x=130)
+	file_input = tk.Entry(frame2,width=40)
+	file_input.place(y=100,x=130)
 
-	submit_form = tk.Button(frame2,text='Submit',width=10)
+	submit_form = tk.Button(frame2,text='Submit',width=10, command=rec_details)
 	submit_form.place(y=150,x=130)
 
 	cancelEntry = tk.Button(frame2,text='Cancel',width=10,command=root2.quit)
@@ -96,7 +130,7 @@ frame.place(relwidth=0.8,relheight=0.6, relx=0.1, rely=0.15)
 selectFile = tk.Button(root,text="SelectFile",bg='#30475e', fg='white',width=20,padx=10, pady=5 , command=chooseFiles)
 selectFile.pack	()
 
-sendFile = tk.Button(root,text="SendFile",bg='#30475e', fg='white',width=20,padx=10, pady=5)
+sendFile = tk.Button(root,text="SendFile",bg='#30475e', fg='white',width=20,padx=10, pady=5, command=sendingFile)
 sendFile.pack()
 
 startUp()
