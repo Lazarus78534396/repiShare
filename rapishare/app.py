@@ -8,6 +8,7 @@ root.geometry("500x600")
 root.resizable(False,False)
 myFiles=[]
 
+
 def startUp():
 	#to run when the app is started
 	if selectFile['state'] and sendFile['state'] == tk.NORMAL:
@@ -72,18 +73,14 @@ def join_form():
 	root2.geometry("500x250")
 	root2.resizable(False,False)
 
+
 	def rec_details():
 		s = socket.socket()
-		theHost=host_input.get()
+		rec_details.theHost=host_input.get()
 		port = 5002
-		s.connect((theHost,port))
+		s.connect((rec_details.theHost,port))
 		showinfo('Connected', 'Connected...')
-		mynewFile=file_input.get()
-		file = open(mynewFile,'wb')
-		file_data = s.recv(1024)
-		file.write(file_data)
-		file.close()
-		showinfo('Recieved','File Recieved')
+		newFilenaming()
 		
 
 	frame2 = tk.Frame(root2,bg="#30475e")
@@ -95,12 +92,6 @@ def join_form():
 	host_input = tk.Entry(frame2,width=40)
 	host_input.place(y=50,x=130)
 
-	new_fileName= tk.Label(frame2,text='New File Name:')
-	new_fileName.place(y=100,x=30)
-
-	file_input = tk.Entry(frame2,width=40)
-	file_input.place(y=100,x=130)
-
 	submit_form = tk.Button(frame2,text='Submit',width=10, command=rec_details)
 	submit_form.place(y=150,x=130)
 
@@ -108,6 +99,38 @@ def join_form():
 	cancelEntry.place(y=150,x=295)
 
 	root2.mainloop()
+def newFilenaming():
+	root3 = tk.Tk()
+	root3.geometry("500x200")
+	root3.resizable(False,False)
+
+	def rec_name():
+		s = socket.socket()
+		myHost=rec_details.theHost
+		port = 5002
+		s.connect((myHost,port))
+		mynewFile=file_input.get()
+		file = open(mynewFile,'wb')
+		file_data = s.recv(1024)
+		
+		file.write(file_data)
+		file.close()
+		showinfo('Recieved','File Recieved')
+
+	frame3 = tk.Frame(root3,bg="#30475e")
+	frame3.place(relwidth=1,relheight=1)
+
+	new_fileName= tk.Label(frame3,text='New File Name:')
+	new_fileName.place(y=100,x=30)
+
+	file_input = tk.Entry(frame3,width=40)
+	file_input.place(y=100,x=130)
+
+	submit_form1 = tk.Button(frame3,text='Submit',width=10, command=rec_name)
+	submit_form1.place(y=150,x=130)
+
+	cancelEntry1 = tk.Button(frame3,text='Cancel',width=10,command=root3.quit)
+	cancelEntry1.place(y=150,x=295)
 
 def joinConn():
 	#to join a connection as a client
